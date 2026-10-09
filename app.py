@@ -77,114 +77,103 @@ PAGINA_HTML = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a1c12">
 <link rel="icon" href="data:,">
-<title>Sensor DHT11</title>
+<title>Monitor DHT11</title>
 <style>
-@property --h{syntax:"<number>";inherits:true;initial-value:200}
 :root{
-  --h:200;
-  transition:--h 1.5s ease;
-  --bg:hsl(var(--h) 40% 92%);
-  --bg2:hsl(calc(var(--h) + 24) 48% 83%);
-  --card:rgba(255,255,255,.6);
-  --cardline:rgba(255,255,255,.8);
-  --solid:#fff;
-  --ink:#15242b;
-  --muted:#52666f;
-  --track:rgba(21,36,43,.12);
-  --acc-t:hsl(var(--h) 72% 42%);
-  --acc-h:hsl(196 75% 38%);
-  --ok:#23824f; --err:#b3261e;
+  color-scheme:dark;
+  --bg:#0a1c12;
+  --card:#12291c;
+  --cardline:#21402e;
+  --solid:#12291c;
+  --ink:#e9f0e2;
+  --muted:#93a998;
+  --track:rgba(181,199,124,.16);
+  --soft:rgba(181,199,124,.08);
+  --acc-t:#b9cb82;      /* verde musgo claro */
+  --acc-h:#93b06e;      /* verde musgo */
+  --ok:#b9cb82;
+  --off:#5f7a66;
+  --warn:#1a3324;
   font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:hsl(var(--h) 34% 10%);
-    --bg2:hsl(calc(var(--h) + 24) 38% 16%);
-    --card:rgba(255,255,255,.07);
-    --cardline:rgba(255,255,255,.12);
-    --solid:#22333b;
-    --ink:#e8f0f3;
-    --muted:#9bb0ba;
-    --track:rgba(255,255,255,.15);
-    --acc-t:hsl(var(--h) 85% 62%);
-    --acc-h:hsl(193 80% 60%);
-    --ok:#52cc8a; --err:#ff8a80;
-  }
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
   min-height:100vh;
+  background:var(--bg);
   color:var(--ink);
-  background:linear-gradient(160deg,var(--bg),var(--bg2)) fixed;
-  padding:max(18px,env(safe-area-inset-top)) 16px 28px;
+  padding:max(20px,env(safe-area-inset-top)) 16px 32px;
 }
-.wrap{max-width:840px;margin:0 auto}
+.wrap{max-width:880px;margin:0 auto}
 
+/* topo */
 header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-h1{margin:0;font-size:1.05rem;font-weight:650;letter-spacing:-.01em}
-.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.marca{display:flex;align-items:center;gap:12px;font-weight:700;font-size:1.1rem;letter-spacing:-.01em}
+.logo{width:40px;height:40px;border-radius:14px;background:var(--soft);border:1px solid var(--cardline);display:grid;place-items:center}
 .status{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);
-  padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--cardline)}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
-.status.on .dot{background:var(--ok);animation:pulse 2s ease-out infinite}
-.status.off .dot{background:var(--err)}
-@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 55%,transparent)}100%{box-shadow:0 0 0 9px transparent}}
-.seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--track)}
-.seg button{
-  font:inherit;font-size:.85rem;font-weight:600;color:var(--muted);
-  border:0;background:transparent;padding:5px 14px;border-radius:999px;cursor:pointer;
-}
-.seg button[aria-pressed="true"]{background:var(--solid);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
-button:focus-visible{outline:2px solid var(--acc-h);outline-offset:2px}
+  padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--cardline)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok)}
+.status.on .dot{animation:pulse 2s ease-out infinite}
+.status.off .dot{background:transparent;border:2px solid var(--off)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(185,203,130,.55)}100%{box-shadow:0 0 0 9px rgba(185,203,130,0)}}
 
-.resumo{margin:22px 0 22px;font-size:clamp(1.5rem,5vw,2.1rem);font-weight:500;letter-spacing:-.025em;line-height:1.2;max-width:22ch}
+/* resumo e escalas */
+.resumo{margin:30px 0 18px;font-size:clamp(1.7rem,5.5vw,2.5rem);font-weight:600;letter-spacing:-.025em;line-height:1.15;max-width:20ch}
+.un{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:var(--card);border:1px solid var(--cardline)}
+.un button{font:inherit;font-weight:700;font-size:.95rem;color:var(--muted);background:transparent;border:0;
+  padding:8px 20px;border-radius:999px;cursor:pointer;min-width:58px}
+.un button[aria-pressed="true"]{background:var(--acc-t);color:#13230f}
+.un button:focus-visible{outline:2px solid var(--acc-t);outline-offset:2px}
+.escala{margin:14px 0 22px;padding:12px 16px;border-radius:18px;background:var(--soft);
+  font-size:.88rem;line-height:1.45;color:var(--muted);max-width:68ch}
 
-.aviso{display:none;margin:0 0 16px;padding:12px 14px;border-radius:12px;font-size:.9rem;
-  background:color-mix(in srgb,var(--err) 14%,var(--card));border:1px solid var(--err)}
-.aviso.show{display:block}
+.aviso{display:none;align-items:flex-start;gap:12px;margin:0 0 16px;padding:12px 16px;border-radius:18px;
+  background:var(--warn);border:1px dashed var(--off);font-size:.9rem}
+.aviso.show{display:flex}
+.aviso::before{content:"!";flex:none;width:24px;height:24px;border-radius:50%;background:var(--acc-t);color:#13230f;
+  font-weight:800;display:grid;place-items:center}
 
+/* cards */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:640px){.grid{grid-template-columns:1fr}}
-.card{
-  background:var(--card);border:1px solid var(--cardline);border-radius:24px;padding:22px 20px 18px;
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  transition:opacity .4s,filter .4s;
-}
-#cardT{--acc:var(--acc-t)} #cardH{--acc:var(--acc-h)}
-body.off .card{opacity:.55;filter:saturate(.4)}
+@media (max-width:680px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--cardline);border-radius:32px;padding:24px 22px 20px;
+  transition:opacity .4s,filter .4s}
+#cardT{--acc:var(--acc-t)}
+#cardH{--acc:var(--acc-h)}
+body.off .card{opacity:.55;filter:grayscale(.6)}
 
 .gauge{display:block;width:100%;max-width:270px;margin:0 auto;height:auto;overflow:visible}
-.gauge path{fill:none;stroke-width:12;stroke-linecap:round}
+.gauge path{fill:none;stroke-width:13;stroke-linecap:round}
 .trk{stroke:var(--track)}
 .arc{stroke:var(--acc);stroke-dasharray:0 100;transition:stroke-dasharray .9s cubic-bezier(.2,.8,.2,1)}
 .thumb{transform-box:view-box;transform-origin:100px 100px;transform:rotate(135deg);
   transition:transform .9s cubic-bezier(.2,.8,.2,1)}
-.thumb circle{fill:#fff;stroke:var(--acc);stroke-width:4}
-.gv{font-size:48px;font-weight:300;letter-spacing:-2px;fill:var(--ink);text-anchor:middle;font-variant-numeric:tabular-nums}
-.gu{font-size:15px;fill:var(--muted);text-anchor:middle;font-weight:500}
+.thumb circle{fill:#f2f6e8;stroke:var(--acc);stroke-width:4}
+.gv{font-size:48px;font-weight:400;letter-spacing:-2px;fill:var(--ink);text-anchor:middle;font-variant-numeric:tabular-nums}
+.gu{font-size:15px;fill:var(--acc);text-anchor:middle;font-weight:600}
 .gl{font-size:12.5px;fill:var(--muted);text-anchor:middle}
 .ge{font-size:10.5px;fill:var(--muted);text-anchor:middle;font-variant-numeric:tabular-nums}
 
-.spark{margin-top:6px}
-.readout{margin:0 0 4px;font-size:.82rem;color:var(--muted);min-height:1.2em;font-variant-numeric:tabular-nums}
+.spark{margin-top:10px;padding:12px 14px 8px;border-radius:22px;background:var(--soft)}
+.readout{margin:0 0 6px;font-size:.82rem;color:var(--muted);min-height:1.2em;font-variant-numeric:tabular-nums}
 .spark svg{display:block;width:100%;height:auto;color:var(--acc);touch-action:pan-y;cursor:crosshair}
-.al{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.al{fill:none;stroke:currentColor;stroke-width:2.8;stroke-linejoin:round;stroke-linecap:round}
 .aa{stroke:none}
 .cur{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
-.pt{fill:currentColor;stroke:var(--solid);stroke-width:2.5}
+.pt{fill:currentColor;stroke:var(--card);stroke-width:2.5}
 
-.mm{display:flex;justify-content:space-between;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--track)}
-.mm div{display:flex;flex-direction:column;gap:2px}
+.mm{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.mm div{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:18px;background:var(--soft)}
 .mm div:last-child{text-align:right}
 .mm span{font-size:.78rem;color:var(--muted)}
-.mm b{font-size:1.05rem;font-weight:600;font-variant-numeric:tabular-nums}
+.mm b{font-size:1.05rem;font-weight:650;font-variant-numeric:tabular-nums}
 
-footer{margin-top:20px;text-align:center;font-size:.8rem;color:var(--muted)}
+footer{margin-top:22px;text-align:center;font-size:.8rem;color:var(--muted)}
 footer p{margin:2px 0}
 @media (prefers-reduced-motion:reduce){
-  :root{transition:none}
   .status.on .dot{animation:none}
   .arc,.thumb,.card{transition:none}
 }
@@ -193,17 +182,28 @@ footer p{margin:2px 0}
 <body>
 <div class="wrap">
   <header>
-    <h1>Sensor DHT11</h1>
-    <div class="ctrl">
-      <div id="status" class="status"><span class="dot"></span><span id="stxt">Conectando…</span></div>
-      <div class="seg" role="group" aria-label="Unidade de temperatura">
-        <button id="uC" aria-pressed="true">°C</button>
-        <button id="uF" aria-pressed="false">°F</button>
-      </div>
+    <div class="marca">
+      <span class="logo">
+        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+          <rect x="2" y="12" width="5" height="8" rx="2.5" fill="#93b06e"/>
+          <rect x="8.5" y="7" width="5" height="13" rx="2.5" fill="#a9bf79"/>
+          <rect x="15" y="2" width="5" height="18" rx="2.5" fill="#b9cb82"/>
+        </svg>
+      </span>
+      Monitor DHT11
     </div>
+    <div id="status" class="status"><span class="dot"></span><span id="stxt">Conectando…</span></div>
   </header>
 
-  <p id="resumo" class="resumo">Aguardando a primeira leitura…</p>
+  <h1 id="resumo" class="resumo">Aguardando a primeira leitura…</h1>
+
+  <div class="un" role="group" aria-label="Escala de temperatura">
+    <button id="uC" aria-pressed="true">°C</button>
+    <button id="uF" aria-pressed="false">°F</button>
+    <button id="uK" aria-pressed="false">K</button>
+  </div>
+  <p id="escala" class="escala"></p>
+
   <p id="aviso" class="aviso"></p>
 
   <div class="grid">
@@ -223,7 +223,7 @@ footer p{margin:2px 0}
         <p class="readout" id="sTr">Últimos 3 minutos</p>
         <svg id="sT" viewBox="0 0 300 70" aria-label="Histórico de temperatura">
           <defs><linearGradient id="gaT" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="currentColor" stop-opacity=".32"/>
+            <stop offset="0" stop-color="currentColor" stop-opacity=".35"/>
             <stop offset="1" stop-color="currentColor" stop-opacity="0"/>
           </linearGradient></defs>
           <path id="sTa" class="aa" fill="url(#gaT)" d=""/>
@@ -254,7 +254,7 @@ footer p{margin:2px 0}
         <p class="readout" id="sHr">Últimos 3 minutos</p>
         <svg id="sH" viewBox="0 0 300 70" aria-label="Histórico de umidade">
           <defs><linearGradient id="gaH" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="currentColor" stop-opacity=".32"/>
+            <stop offset="0" stop-color="currentColor" stop-opacity=".35"/>
             <stop offset="1" stop-color="currentColor" stop-opacity="0"/>
           </linearGradient></defs>
           <path id="sHa" class="aa" fill="url(#gaH)" d=""/>
@@ -290,23 +290,29 @@ const sp = {
 };
 let cur = null;
 let u = 'C';
-try { u = localStorage.getItem('unidade') === 'F' ? 'F' : 'C'; } catch (e) {}
+try {
+  const salvo = localStorage.getItem('unidade');
+  if (salvo === 'F' || salvo === 'K') u = salvo;
+} catch (e) {}
 
-const conv = c => u === 'F' ? c * 9 / 5 + 32 : c;
+// ----- escalas de temperatura -----
+const ESCALAS = {
+  C: { simbolo: '°C', conv: c => c,
+       texto: 'Celsius: 0 °C é o ponto de fusão do gelo e 100 °C o de ebulição da água, em 100 partes iguais. É a escala do dia a dia no Brasil.' },
+  F: { simbolo: '°F', conv: c => c * 9 / 5 + 32,
+       texto: 'Fahrenheit: a água congela a 32 °F e ferve a 212 °F, em 180 partes. É usada principalmente nos Estados Unidos e em países de língua inglesa.' },
+  K: { simbolo: 'K', conv: c => c + 273.15,
+       texto: 'Kelvin: escala absoluta e unidade oficial do SI. 0 K é o zero absoluto, a ausência total de agitação molecular. Não leva o símbolo de grau.' }
+};
+const conv = c => ESCALAS[u].conv(c);
 const fmt = v => v.toFixed(1).replace('.', ',');
 const pct = (v, a, b) => Math.max(0, Math.min(100, (v - a) / (b - a) * 100));
-const valor = (k, v) => k === 't' ? fmt(conv(v)) + ' °' + u : fmt(v) + ' %';
+const valor = (k, v) => k === 't' ? fmt(conv(v)) + ' ' + ESCALAS[u].simbolo : fmt(v) + ' %';
 
 function resumo(t, h) {
   const a = t < 18 ? 'frio' : t < 27 ? 'agradável' : t < 32 ? 'quente' : 'muito quente';
   const b = h < 30 ? 'seco' : h <= 60 ? 'confortável' : 'úmido';
   return 'Está ' + a + ' e o ar está ' + b + '.';
-}
-
-// Cor ambiente: azul (frio) -> verde (agradavel) -> laranja/vermelho (quente)
-function matiz(t) {
-  const p = (Math.max(5, Math.min(38, t)) - 5) / 33;
-  return Math.round(215 - p * 205);
 }
 
 function status(estado, texto) {
@@ -320,6 +326,7 @@ function aviso(msg) {
   el.classList.toggle('show', !!msg);
 }
 
+// ----- grafico -----
 function mostrarPonto(k) {
   const s = sp[k], c = $(s.id + 'c'), d = $(s.id + 'd'), r = $(s.id + 'r');
   if (s.vx === null || !s.xs.length) {
@@ -362,16 +369,22 @@ function desenhar(k) {
   mostrarPonto(k);
 }
 
+// ----- tela -----
+function rotulosEscala() {
+  $('tlo').textContent = Math.round(conv(0));
+  $('thi').textContent = Math.round(conv(50));
+  $('tu').textContent = ESCALAS[u].simbolo;
+  $('escala').textContent = ESCALAS[u].texto;
+}
+
 function render() {
+  rotulosEscala();
   if (!cur) return;
   const t = cur.t, h = cur.h;
   const tp = pct(t, 0, 50), hp = pct(h, 0, 100);
 
   $('tv').textContent = fmt(conv(t));
-  $('tu').textContent = '°' + u;
   $('hv').textContent = fmt(h);
-  $('tlo').textContent = Math.round(conv(0));
-  $('thi').textContent = Math.round(conv(50));
 
   $('tarc').style.strokeDasharray = tp + ' 100';
   $('harc').style.strokeDasharray = hp + ' 100';
@@ -384,8 +397,6 @@ function render() {
   $('hmax').textContent = valor('h', mm.hmax);
 
   $('resumo').textContent = resumo(t, h);
-  document.documentElement.style.setProperty('--h', matiz(t));
-
   desenhar('t');
   desenhar('h');
 }
@@ -404,12 +415,10 @@ function atualizar(t, h) {
 function setUnidade(x) {
   u = x;
   try { localStorage.setItem('unidade', x); } catch (e) {}
-  $('uC').setAttribute('aria-pressed', x === 'C');
-  $('uF').setAttribute('aria-pressed', x === 'F');
+  ['C', 'F', 'K'].forEach(k => $('u' + k).setAttribute('aria-pressed', k === x));
   render();
 }
-$('uC').onclick = () => setUnidade('C');
-$('uF').onclick = () => setUnidade('F');
+['C', 'F', 'K'].forEach(k => { $('u' + k).onclick = () => setUnidade(k); });
 setUnidade(u);
 
 ['t', 'h'].forEach(k => {
